@@ -22,6 +22,7 @@
 #include "nvim/gettext_defs.h"
 #include "nvim/globals.h"
 #include "nvim/macros_defs.h"
+#include "nvim/mbyte.h"
 #include "nvim/memory.h"
 #include "nvim/message.h"
 #include "nvim/option.h"
@@ -336,6 +337,27 @@ char *get_locales(expand_T *xp, int idx)
   return locales[idx];
 }
 
+/// Ensure LC_CTYPE uses UTF-8. Nvim is always UTF-8 internally; a non-UTF-8
+/// ctype locale mangles multibyte text passed to child processes (clipboard).
+static void enforce_utf8_ctype(void)
+{
+  char *enc = enc_locale();
+  bool is_utf8 = enc != NULL && strcmp(enc, "utf-8") == 0;
+  xfree(enc);
+  if (is_utf8) {
+    return;
+  }
+
+  static const char *const utf8_locales[] = { "C.UTF-8", "en_US.UTF-8", "UTF-8" };
+  for (size_t i = 0; i < ARRAY_SIZE(utf8_locales); i++) {
+    if (setlocale(LC_CTYPE, utf8_locales[i]) != NULL) {
+      // Also fix the environment so child processes (clipboard) use UTF-8.
+      os_setenv("LC_CTYPE", utf8_locales[i], 1);
+      return;
+    }
+  }
+}
+
 void lang_init(void)
 {
 #if defined(__APPLE__)
@@ -368,4 +390,6 @@ void lang_init(void)
 # endif
   }
 #endif
+
+  enforce_utf8_ctype();
 }
