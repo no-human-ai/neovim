@@ -36,7 +36,13 @@ describe('vimscript', function()
     t.skip(t.is_os('win'))
     clear { env = { LANG = 'en_GB' } }
     local locales = n.fn.system('locale -a')
-    if not string.find(locales, '[uU][tT][fF]%-?8') then
+    -- Only C.UTF-8 or en_US.UTF-8 are candidates the fix can actually pick.
+    if
+      not (
+        string.find(locales, 'C%.[uU][tT][fF]%-?8')
+        or string.find(locales, 'en_US%.[uU][tT][fF]%-?8')
+      )
+    then
       pending('no UTF-8 locale available')
       return
     end

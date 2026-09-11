@@ -370,7 +370,7 @@ static void set_ctype_utf8(void)
       // Export it so child processes (e.g. clipboard tools) use UTF-8 too.
       os_setenv("LC_CTYPE", cands[i], 1);
       if (os_env_exists("LC_ALL", true)) {
-        // Unset $LC_ALL, otherwise it would overrule LC_CTYPE.
+        // Unset $LC_ALL (it would overrule LC_CTYPE); other LC_* fall back to $LANG.
         os_unsetenv("LC_ALL");
       }
       return;
