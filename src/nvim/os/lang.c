@@ -339,7 +339,7 @@ char *get_locales(expand_T *xp, int idx)
 
 #ifndef MSWIN
 /// Force LC_CTYPE to a UTF-8 locale, so multibyte text is handled correctly
-/// by the OS and by child processes (e.g. clipboard tools). #11507
+/// by the OS and by child processes (e.g. clipboard tools). #11432
 static void set_ctype_utf8(void)
 {
   char *enc = enc_locale();
@@ -370,8 +370,8 @@ static void set_ctype_utf8(void)
       // Export it so child processes (e.g. clipboard tools) use UTF-8 too.
       os_setenv("LC_CTYPE", cands[i], 1);
       if (os_env_exists("LC_ALL", true)) {
-        // Reset $LC_ALL, otherwise it would overrule LC_CTYPE.
-        os_setenv("LC_ALL", "", 1);
+        // Unset $LC_ALL, otherwise it would overrule LC_CTYPE.
+        os_unsetenv("LC_ALL");
       }
       return;
     }

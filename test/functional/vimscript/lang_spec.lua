@@ -32,7 +32,7 @@ describe('vimscript', function()
     eq(2.2, eval('str2float("2.2")'))
   end)
 
-  it('uses a UTF-8 locale when $LANG has no encoding #11507', function()
+  it('uses a UTF-8 locale when $LANG has no encoding #11432', function()
     t.skip(t.is_os('win'))
     clear { env = { LANG = 'en_GB' } }
     local locales = n.fn.system('locale -a')
@@ -51,5 +51,7 @@ describe('vimscript', function()
     end
     clear { env = { LANG = 'en_US.UTF-8' } }
     t.matches('en_US', n.eval('v:ctype'))
+    -- $LC_CTYPE is only exported when the fix actually forces a locale.
+    eq('', n.eval('$LC_CTYPE'))
   end)
 end)
